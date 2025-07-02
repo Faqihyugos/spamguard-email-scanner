@@ -342,8 +342,8 @@ Urgent Security Alerts`);
 
         {/* Footer */}
         <div className="text-center mt-12 text-gray-500 space-y-3">
-          <div className="flex items-center justify-center space-x-4">
-            <p>© 2025 SpamGuard - Protecting your inbox from threats</p>
+          <div className="flex flex-col sm:flex-row items-center justify-center space-y-2 sm:space-y-0 sm:space-x-4">
+            <p className="text-sm">© 2025 SpamGuard - Protecting your inbox from threats</p>
             <div className="flex items-center space-x-1">
               <span>•</span>
               <span>Created by</span>
