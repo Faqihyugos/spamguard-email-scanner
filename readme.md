@@ -10,7 +10,7 @@
 
 **Advanced email security scanner with enhanced pattern detection and offline capabilities**
 
-[🚀 Live Demo](https://your-demo-url.com) • [📖 Documentation](#documentation) • [🐛 Report Bug](https://github.com/yourusername/spamguard/issues) • [✨ Request Feature](https://github.com/yourusername/spamguard/issues)
+[🚀 Live Demo](https://spamguard.netlify.app/) • [📖 Documentation](#documentation) • [🐛 Report Bug](https://github.com/Faqihyugos/spamguard-email-scanner/issues) • [✨ Request Feature](https://github.com/Faqihyugos/spamguard-email-scanner/issues)
 
 </div>
 
@@ -86,10 +86,10 @@
 
 ```bash
 # Clone the repository
-git clone https://github.com/yourusername/spamguard.git
+git clone https://github.com/Faqihyugos/spamguard-email-scanner.git
 
 # Navigate to project directory
-cd spamguard
+cd spamguard-email-scanner
 
 # Install dependencies
 npm install
@@ -116,8 +116,8 @@ npm run preview
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/yourusername/spamguard.git
-   cd spamguard
+   git clone https://github.com/Faqihyugos/spamguard-email-scanner.git
+   cd spamguard-email-scanner
    ```
 
 2. **Install dependencies**
