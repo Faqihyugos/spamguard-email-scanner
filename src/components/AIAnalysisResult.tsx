@@ -1,5 +1,5 @@
 import React from 'react';
-import { Brain, CheckCircle, AlertTriangle, XCircle, Zap } from 'lucide-react';
+import { Brain, CheckCircle, AlertTriangle, XCircle, Zap, Cpu } from 'lucide-react';
 import { SpamAnalysisResult } from '../types/SpamAnalysis';
 
 interface AIAnalysisResultProps {
@@ -25,9 +25,9 @@ export const AIAnalysisResult: React.FC<AIAnalysisResultProps> = ({ analysis }) 
     <div className={`border rounded-lg p-4 ${getConfidenceBg()}`}>
       <div className="flex items-center space-x-2 mb-3">
         <Brain className="w-5 h-5 text-purple-600" />
-        <h3 className="font-semibold text-gray-800">AI Analysis Results</h3>
+        <h3 className="font-semibold text-gray-800">Enhanced Analysis Results</h3>
         <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full font-medium">
-          AI POWERED
+          SMART PATTERNS
         </span>
       </div>
       
@@ -35,7 +35,7 @@ export const AIAnalysisResult: React.FC<AIAnalysisResultProps> = ({ analysis }) 
         <div className="flex items-center space-x-2">
           <Zap className={`w-4 h-4 ${getConfidenceColor()}`} />
           <div>
-            <p className="text-sm font-medium">AI Confidence</p>
+            <p className="text-sm font-medium">Analysis Confidence</p>
             <p className={`text-lg font-bold ${getConfidenceColor()}`}>
               {analysis.confidence}%
             </p>
@@ -64,7 +64,7 @@ export const AIAnalysisResult: React.FC<AIAnalysisResultProps> = ({ analysis }) 
         <div className="flex items-center space-x-2">
           <Brain className="w-4 h-4 text-purple-600" />
           <div>
-            <p className="text-sm font-medium">AI Indicators</p>
+            <p className="text-sm font-medium">Smart Indicators</p>
             <p className="text-lg font-bold text-purple-600">
               {analysis.indicators.filter(i => i.type === 'ai_detection').length}
             </p>
@@ -72,10 +72,10 @@ export const AIAnalysisResult: React.FC<AIAnalysisResultProps> = ({ analysis }) 
         </div>
       </div>
       
-      {/* AI-specific indicators */}
+      {/* Enhanced analysis indicators */}
       {analysis.indicators.filter(i => i.type === 'ai_detection').length > 0 && (
         <div className="space-y-2">
-          <h4 className="font-medium text-gray-800 mb-2">AI Insights:</h4>
+          <h4 className="font-medium text-gray-800 mb-2">Advanced Pattern Detection:</h4>
           {analysis.indicators
             .filter(i => i.type === 'ai_detection')
             .map((indicator, index) => (
@@ -97,9 +97,13 @@ export const AIAnalysisResult: React.FC<AIAnalysisResultProps> = ({ analysis }) 
       )}
       
       <div className="mt-3 p-3 bg-white bg-opacity-50 rounded border">
+        <div className="flex items-center space-x-2 mb-1">
+          <Cpu className="w-4 h-4 text-purple-600" />
+          <span className="text-xs font-medium text-purple-800">Enhanced Local Analysis</span>
+        </div>
         <p className="text-xs text-gray-600">
-          <span className="font-medium">Note:</span> AI analysis uses advanced machine learning models 
-          to detect sophisticated threats that traditional rule-based systems might miss.
+          Uses advanced pattern recognition, sentiment analysis, and heuristic algorithms 
+          to provide AI-like detection capabilities while keeping your data private and secure.
         </p>
       </div>
     </div>

@@ -33,11 +33,11 @@ function App() {
     try {
       let result: SpamAnalysisResult;
       
-      if (analysisMethod === 'ai' && isOnline) {
-        // Use AI analysis
+      if (analysisMethod === 'ai') {
+        // Use enhanced local analysis (AI-style)
         result = await analyzeEmailWithAI(emailContent, emailSubject, emailSender);
       } else {
-        // Use local analysis
+        // Use basic local analysis
         result = analyzeEmail(emailContent, emailSubject, emailSender);
         result.analysisMethod = 'local';
         result.confidence = 75;
@@ -46,7 +46,7 @@ function App() {
       setAnalysis(result);
     } catch (error) {
       console.error('Analysis failed:', error);
-      // Fallback to local analysis
+      // Fallback to basic local analysis
       const result = analyzeEmail(emailContent, emailSubject, emailSender);
       result.analysisMethod = 'local';
       result.confidence = 75;
@@ -95,13 +95,6 @@ Urgent Security Alerts`);
     setUploadError('');
   };
 
-  // Auto-switch to local analysis when offline
-  useEffect(() => {
-    if (!isOnline && analysisMethod === 'ai') {
-      setAnalysisMethod('local');
-    }
-  }, [isOnline, analysisMethod]);
-
   useEffect(() => {
     // Auto-analyze when content changes (with debounce)
     const timeoutId = setTimeout(() => {
@@ -125,10 +118,10 @@ Urgent Security Alerts`);
             <h1 className="text-4xl font-bold text-gray-800">SpamGuard</h1>
           </div>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
-            Advanced email security scanner with AI-powered detection and offline capabilities
+            Advanced email security scanner with enhanced pattern detection and offline capabilities
           </p>
           <div className="mt-2 text-sm text-gray-500">
-            ✨ Works offline - Your privacy is protected • 🧠 AI-enhanced when online
+            ✨ Works offline - Your privacy is protected • 🧠 Enhanced analysis available
           </div>
         </div>
 
@@ -147,9 +140,9 @@ Urgent Security Alerts`);
                 <div className="flex items-center space-x-2 mb-4">
                   <Mail className="w-5 h-5 text-blue-600" />
                   <h2 className="text-xl font-semibold text-gray-800">Email Analysis</h2>
-                  {analysisMethod === 'ai' && isOnline && (
+                  {analysisMethod === 'ai' && (
                     <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full font-medium">
-                      AI POWERED
+                      ENHANCED
                     </span>
                   )}
                 </div>
@@ -245,14 +238,14 @@ Urgent Security Alerts`);
                       <>
                         <div className="animate-spin w-4 h-4 border-2 border-white border-t-transparent rounded-full"></div>
                         <span>
-                          {analysisMethod === 'ai' && isOnline ? 'AI Analyzing...' : 'Analyzing...'}
+                          {analysisMethod === 'ai' ? 'Enhanced Analyzing...' : 'Analyzing...'}
                         </span>
                       </>
                     ) : (
                       <>
                         <Scan className="w-4 h-4" />
                         <span>
-                          {analysisMethod === 'ai' && isOnline ? 'AI Analyze' : 'Analyze Email'}
+                          {analysisMethod === 'ai' ? 'Enhanced Analyze' : 'Analyze Email'}
                         </span>
                       </>
                     )}
@@ -295,7 +288,7 @@ Urgent Security Alerts`);
                 <>
                   <SpamMeter score={analysis.spamScore} riskLevel={analysis.riskLevel} />
                   
-                  {/* AI Analysis Results */}
+                  {/* Enhanced Analysis Results */}
                   {analysis.analysisMethod === 'ai' && (
                     <AIAnalysisResult analysis={analysis} />
                   )}
@@ -312,7 +305,7 @@ Urgent Security Alerts`);
                         <h3 className="text-xl font-semibold text-gray-800">Security Alerts</h3>
                         {analysis.analysisMethod === 'ai' && (
                           <span className="px-2 py-1 bg-purple-100 text-purple-800 text-xs rounded-full font-medium">
-                            AI ENHANCED
+                            ENHANCED
                           </span>
                         )}
                       </div>
@@ -334,14 +327,12 @@ Urgent Security Alerts`);
                   <div className="mt-4 flex justify-center space-x-4 text-sm text-gray-500">
                     <div className="flex items-center space-x-1">
                       <Shield className="w-4 h-4" />
-                      <span>Local Analysis</span>
+                      <span>Basic Analysis</span>
                     </div>
-                    {isOnline && (
-                      <div className="flex items-center space-x-1">
-                        <span>•</span>
-                        <span className="text-purple-600 font-medium">AI-Powered Detection</span>
-                      </div>
-                    )}
+                    <div className="flex items-center space-x-1">
+                      <span>•</span>
+                      <span className="text-purple-600 font-medium">Enhanced Detection</span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -368,7 +359,7 @@ Urgent Security Alerts`);
             </div>
           </div>
           <p className="text-xs">
-            🔒 Local processing for privacy • 🧠 AI enhancement when online • 📱 Works offline
+            🔒 Local processing for privacy • 🧠 Enhanced pattern detection • 📱 Works offline
           </p>
         </div>
       </div>

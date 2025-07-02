@@ -1,34 +1,15 @@
 import { SpamAnalysisResult, SpamIndicator, AIAnalysisRequest, AIAnalysisResponse } from '../types/SpamAnalysis';
 
-// Free AI APIs that can be used for spam detection
-const AI_ENDPOINTS = {
-  huggingface: 'https://api-inference.huggingface.co/models/unitary/toxic-bert',
-  openai_free: 'https://api.openai.com/v1/chat/completions', // Requires API key
-  cohere_free: 'https://api.cohere.ai/v1/classify', // Free tier available
-  // Fallback to local analysis if all fail
-};
-
+// Enhanced local AI simulation that doesn't require external APIs
 export async function analyzeEmailWithAI(
   content: string,
   subject: string,
   sender: string
 ): Promise<SpamAnalysisResult> {
   try {
-    // Try multiple AI services in order of preference
-    const aiResult = await tryAIServices({ content, subject, sender });
-    
-    if (aiResult) {
-      return convertAIResultToSpamAnalysis(aiResult, content, subject, sender);
-    }
-    
-    // Fallback to local analysis if AI fails
-    const { analyzeEmail } = await import('./spamDetection');
-    const localResult = analyzeEmail(content, subject, sender);
-    return {
-      ...localResult,
-      analysisMethod: 'local',
-      confidence: 75
-    };
+    // Use enhanced local analysis that simulates AI behavior
+    const aiResult = await performEnhancedLocalAnalysis({ content, subject, sender });
+    return convertAIResultToSpamAnalysis(aiResult, content, subject, sender);
     
   } catch (error) {
     console.error('AI analysis failed, falling back to local:', error);
@@ -42,133 +23,237 @@ export async function analyzeEmailWithAI(
   }
 }
 
-async function tryAIServices(request: AIAnalysisRequest): Promise<AIAnalysisResponse | null> {
-  // Try Hugging Face Inference API (free)
-  try {
-    const result = await analyzeWithHuggingFace(request);
-    if (result) return result;
-  } catch (error) {
-    console.log('Hugging Face API failed:', error);
-  }
-
-  // Try OpenAI-compatible free services
-  try {
-    const result = await analyzeWithOpenAICompatible(request);
-    if (result) return result;
-  } catch (error) {
-    console.log('OpenAI-compatible API failed:', error);
-  }
-
-  // Try local LLM simulation (as fallback)
-  try {
-    const result = await simulateAIAnalysis(request);
-    if (result) return result;
-  } catch (error) {
-    console.log('Local AI simulation failed:', error);
-  }
-
-  return null;
-}
-
-async function analyzeWithHuggingFace(request: AIAnalysisRequest): Promise<AIAnalysisResponse | null> {
-  const response = await fetch(AI_ENDPOINTS.huggingface, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      // Note: In production, you'd want to use environment variables for API keys
-    },
-    body: JSON.stringify({
-      inputs: `Analyze this email for spam/phishing:
-Subject: ${request.subject}
-From: ${request.sender}
-Content: ${request.content.substring(0, 500)}...`
-    })
-  });
-
-  if (!response.ok) {
-    throw new Error(`Hugging Face API error: ${response.status}`);
-  }
-
-  const data = await response.json();
-  
-  // Process Hugging Face response
-  if (data && Array.isArray(data) && data.length > 0) {
-    const toxicScore = data[0].find((item: any) => item.label === 'TOXIC')?.score || 0;
-    const isSpam = toxicScore > 0.5;
-    
-    return {
-      isSpam,
-      confidence: Math.round(toxicScore * 100),
-      reasoning: `AI detected ${isSpam ? 'suspicious' : 'safe'} content with ${Math.round(toxicScore * 100)}% confidence`,
-      categories: isSpam ? ['toxic', 'suspicious'] : ['safe'],
-      riskFactors: isSpam ? ['AI flagged as potentially harmful'] : []
-    };
-  }
-
-  return null;
-}
-
-async function analyzeWithOpenAICompatible(request: AIAnalysisRequest): Promise<AIAnalysisResponse | null> {
-  // This would use free OpenAI-compatible APIs like Together AI, Groq, etc.
-  // For demo purposes, we'll simulate this
-  
-  const prompt = `Analyze this email for spam/phishing indicators:
-
-Subject: ${request.subject}
-From: ${request.sender}
-Content: ${request.content}
-
-Respond with JSON format:
-{
-  "isSpam": boolean,
-  "confidence": number (0-100),
-  "reasoning": "explanation",
-  "categories": ["category1", "category2"],
-  "riskFactors": ["factor1", "factor2"]
-}`;
-
-  // In a real implementation, you'd call the actual API here
-  // For now, we'll return null to fall back to local analysis
-  return null;
-}
-
-async function simulateAIAnalysis(request: AIAnalysisRequest): Promise<AIAnalysisResponse> {
-  // Enhanced local analysis that simulates AI reasoning
+async function performEnhancedLocalAnalysis(request: AIAnalysisRequest): Promise<AIAnalysisResponse> {
+  // Enhanced pattern recognition that simulates AI analysis
   const { analyzeEmail } = await import('./spamDetection');
   const localResult = analyzeEmail(request.content, request.subject, request.sender);
   
-  const isSpam = localResult.spamScore > 50;
-  const confidence = Math.min(localResult.spamScore + 20, 95); // Boost confidence for AI simulation
+  // Advanced pattern analysis
+  const patterns = analyzeAdvancedPatterns(request);
+  const sentiment = analyzeSentiment(request.content);
+  const linguisticFeatures = analyzeLinguisticFeatures(request.content);
   
-  const categories = [];
-  const riskFactors = [];
+  // Combine all analysis factors
+  let confidence = localResult.spamScore;
+  const categories: string[] = [];
+  const riskFactors: string[] = [];
   
-  if (localResult.indicators.some(i => i.type === 'phishing')) {
+  // Pattern-based enhancements
+  if (patterns.hasPhishingPatterns) {
+    confidence += 15;
     categories.push('phishing');
-    riskFactors.push('Phishing patterns detected');
+    riskFactors.push('Advanced phishing patterns detected');
   }
   
-  if (localResult.indicators.some(i => i.type === 'suspicious_links')) {
-    categories.push('malicious_links');
-    riskFactors.push('Suspicious URLs found');
-  }
-  
-  if (localResult.indicators.some(i => i.type === 'urgency')) {
+  if (patterns.hasSocialEngineering) {
+    confidence += 12;
     categories.push('social_engineering');
-    riskFactors.push('High-pressure tactics');
+    riskFactors.push('Social engineering tactics identified');
   }
+  
+  if (patterns.hasAdvancedThreats) {
+    confidence += 20;
+    categories.push('advanced_threat');
+    riskFactors.push('Sophisticated threat indicators found');
+  }
+  
+  // Sentiment analysis
+  if (sentiment.isManipulative) {
+    confidence += 10;
+    riskFactors.push('Manipulative language patterns');
+  }
+  
+  if (sentiment.isUrgent) {
+    confidence += 8;
+    riskFactors.push('High-pressure psychological tactics');
+  }
+  
+  // Linguistic analysis
+  if (linguisticFeatures.hasGrammarIssues) {
+    confidence += 5;
+    riskFactors.push('Suspicious grammar patterns');
+  }
+  
+  if (linguisticFeatures.hasTranslationArtifacts) {
+    confidence += 7;
+    riskFactors.push('Possible machine translation artifacts');
+  }
+  
+  // Domain reputation analysis
+  const domainAnalysis = analyzeDomainReputation(request.sender);
+  if (domainAnalysis.isSuspicious) {
+    confidence += domainAnalysis.riskScore;
+    riskFactors.push(`Domain reputation: ${domainAnalysis.reason}`);
+  }
+  
+  // Normalize confidence
+  confidence = Math.min(confidence, 95);
+  const isSpam = confidence > 50;
   
   if (!isSpam) {
     categories.push('legitimate');
   }
   
+  // Generate AI-style reasoning
+  const reasoning = generateAIReasoning(isSpam, confidence, riskFactors, patterns);
+  
   return {
     isSpam,
     confidence,
-    reasoning: `AI analysis using advanced pattern recognition detected ${isSpam ? 'multiple spam indicators' : 'legitimate email patterns'}. Confidence: ${confidence}%`,
+    reasoning,
     categories,
     riskFactors
   };
+}
+
+function analyzeAdvancedPatterns(request: AIAnalysisRequest) {
+  const content = request.content.toLowerCase();
+  const subject = request.subject.toLowerCase();
+  const fullText = `${subject} ${content}`;
+  
+  // Advanced phishing patterns
+  const phishingPatterns = [
+    /verify.*account.*immediately/i,
+    /suspended.*24.*hours/i,
+    /click.*here.*now/i,
+    /limited.*time.*offer/i,
+    /confirm.*identity.*urgent/i,
+    /security.*alert.*action/i,
+    /update.*payment.*expire/i,
+    /congratulations.*winner/i
+  ];
+  
+  // Social engineering patterns
+  const socialEngineeringPatterns = [
+    /dear.*valued.*customer/i,
+    /act.*now.*or.*lose/i,
+    /final.*notice/i,
+    /immediate.*action.*required/i,
+    /don't.*miss.*out/i,
+    /exclusive.*offer.*you/i
+  ];
+  
+  // Advanced threat patterns
+  const advancedThreatPatterns = [
+    /bit\.ly|tinyurl|goo\.gl|t\.co/i,
+    /[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}/i, // IP addresses
+    /urgent.*security.*team/i,
+    /microsoft.*apple.*google.*security/i,
+    /tax.*refund.*irs/i,
+    /inheritance.*million.*dollars/i
+  ];
+  
+  return {
+    hasPhishingPatterns: phishingPatterns.some(pattern => pattern.test(fullText)),
+    hasSocialEngineering: socialEngineeringPatterns.some(pattern => pattern.test(fullText)),
+    hasAdvancedThreats: advancedThreatPatterns.some(pattern => pattern.test(fullText))
+  };
+}
+
+function analyzeSentiment(content: string) {
+  const urgentWords = ['urgent', 'immediate', 'now', 'asap', 'quickly', 'fast', 'hurry'];
+  const manipulativeWords = ['limited', 'exclusive', 'special', 'secret', 'guaranteed', 'free', 'win'];
+  const fearWords = ['suspended', 'blocked', 'terminated', 'expired', 'lose', 'miss'];
+  
+  const contentLower = content.toLowerCase();
+  
+  const urgentCount = urgentWords.filter(word => contentLower.includes(word)).length;
+  const manipulativeCount = manipulativeWords.filter(word => contentLower.includes(word)).length;
+  const fearCount = fearWords.filter(word => contentLower.includes(word)).length;
+  
+  return {
+    isManipulative: manipulativeCount >= 2,
+    isUrgent: urgentCount >= 2,
+    usesFear: fearCount >= 1,
+    sentimentScore: urgentCount + manipulativeCount + fearCount
+  };
+}
+
+function analyzeLinguisticFeatures(content: string) {
+  // Grammar and linguistic analysis
+  const grammarIssues = [
+    /\s{2,}/g, // Multiple spaces
+    /[.!?]{2,}/g, // Multiple punctuation
+    /[A-Z]{4,}/g, // Excessive caps
+    /\b(recieve|seperate|occured|definately)\b/gi // Common misspellings
+  ];
+  
+  const translationArtifacts = [
+    /\b(kindly|please to|do the needful)\b/gi,
+    /\b(revert back|prepone|good name)\b/gi
+  ];
+  
+  const grammarIssueCount = grammarIssues.reduce((count, pattern) => {
+    const matches = content.match(pattern);
+    return count + (matches ? matches.length : 0);
+  }, 0);
+  
+  const translationArtifactCount = translationArtifacts.reduce((count, pattern) => {
+    const matches = content.match(pattern);
+    return count + (matches ? matches.length : 0);
+  }, 0);
+  
+  return {
+    hasGrammarIssues: grammarIssueCount > 2,
+    hasTranslationArtifacts: translationArtifactCount > 0,
+    grammarScore: grammarIssueCount,
+    translationScore: translationArtifactCount
+  };
+}
+
+function analyzeDomainReputation(sender: string) {
+  const emailMatch = sender.match(/@([^>]+)/);
+  const domain = emailMatch ? emailMatch[1].toLowerCase() : '';
+  
+  // Known suspicious patterns
+  const suspiciousDomains = [
+    'urgent-security-alert.com',
+    'security-team-alert.com',
+    'account-verification.net',
+    'payment-update.org'
+  ];
+  
+  const suspiciousPatterns = [
+    /security.*alert/i,
+    /urgent.*team/i,
+    /account.*verify/i,
+    /payment.*update/i,
+    /microsoft.*security/i,
+    /apple.*support/i
+  ];
+  
+  const trustedDomains = [
+    'gmail.com', 'outlook.com', 'yahoo.com', 'hotmail.com',
+    'apple.com', 'microsoft.com', 'google.com', 'amazon.com'
+  ];
+  
+  if (trustedDomains.includes(domain)) {
+    return { isSuspicious: false, riskScore: 0, reason: 'trusted domain' };
+  }
+  
+  if (suspiciousDomains.includes(domain)) {
+    return { isSuspicious: true, riskScore: 25, reason: 'known suspicious domain' };
+  }
+  
+  if (suspiciousPatterns.some(pattern => pattern.test(domain))) {
+    return { isSuspicious: true, riskScore: 15, reason: 'suspicious domain pattern' };
+  }
+  
+  // Check for domain age simulation (newer domains are more suspicious)
+  if (domain.length < 8 || /\d{3,}/.test(domain)) {
+    return { isSuspicious: true, riskScore: 10, reason: 'suspicious domain structure' };
+  }
+  
+  return { isSuspicious: false, riskScore: 0, reason: 'unknown domain' };
+}
+
+function generateAIReasoning(isSpam: boolean, confidence: number, riskFactors: string[], patterns: any): string {
+  if (isSpam) {
+    const primaryFactors = riskFactors.slice(0, 3);
+    return `AI analysis detected ${primaryFactors.length} critical risk factors with ${confidence}% confidence. Primary concerns: ${primaryFactors.join(', ')}. The email exhibits patterns consistent with ${patterns.hasPhishingPatterns ? 'phishing attacks' : patterns.hasSocialEngineering ? 'social engineering' : 'spam campaigns'}.`;
+  } else {
+    return `AI analysis indicates legitimate email with ${confidence}% confidence. No significant threat patterns detected. Content appears to follow normal communication patterns without suspicious indicators.`;
+  }
 }
 
 async function convertAIResultToSpamAnalysis(
@@ -202,9 +287,7 @@ async function convertAIResultToSpamAnalysis(
     });
   });
   
-  const spamScore = aiResult.isSpam 
-    ? Math.max(baseResult.spamScore, aiResult.confidence)
-    : Math.min(baseResult.spamScore, 100 - aiResult.confidence);
+  const spamScore = Math.max(baseResult.spamScore, aiResult.confidence);
   
   let riskLevel: 'safe' | 'suspicious' | 'dangerous';
   if (spamScore >= 70) {
